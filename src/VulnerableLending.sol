@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 // Interface for Uniswap V2 Pair
 interface IUniswapV2Pair {
@@ -23,7 +22,7 @@ interface IFlashLoanReceiver {
 }
 
 // Vulnerable lending protocol
-contract VulnerableLending is ReentrancyGuard {
+contract VulnerableLending  {
     IUniswapV2Pair public immutable uniswapPair;
     IERC20 public immutable token;
     mapping(address => uint256) public deposits;
@@ -46,13 +45,13 @@ contract VulnerableLending is ReentrancyGuard {
     }
     
     // Users can deposit tokens and get ETH loans based on token price
-    function deposit(uint256 amount) external nonReentrant {
+    function deposit(uint256 amount) external {
         require(token.transferFrom(msg.sender, address(this), amount), "Transfer failed");
         deposits[msg.sender] += amount;
     }
     
     // Vulnerable borrow function that relies on manipulatable price
-    function borrow(uint256 tokenAmount) external nonReentrant {
+    function borrow(uint256 tokenAmount) external {
         require(deposits[msg.sender] >= tokenAmount, "Insufficient deposit");
         
         uint256 price = getPrice();
@@ -77,7 +76,7 @@ contract PriceManipulationAttack is IFlashLoanReceiver {
     
     constructor(
         address _uniswapPair,
-        address _lendingProtocol,
+        address payable _lendingProtocol,  // Changed to address payable
         address _token
     ) {
         uniswapPair = IUniswapV2Pair(_uniswapPair);
